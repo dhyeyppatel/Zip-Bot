@@ -16,7 +16,11 @@ app_key = os.environ.get('API_HASH')
 token = os.environ.get('BOT_TOKEN')
 admin_id = os.environ.get('ADMIN_ID')
 
-app = Client("zipBot", api_id=app_id, api_hash=app_key, bot_token=token)
+app = Client("zipBot", api_id=app_id, api_hash=app_key, bot_token=token, in_memory=True)
+
+@app.on_message(group=-1)
+async def log_all(client, message):
+    logging.info(f"Received message from {message.from_user.id if message.from_user else 'Unknown'}: {message.text or 'Media'}")
 
 @app.on_message(filters.command("ping"))
 async def ping(client, message):
