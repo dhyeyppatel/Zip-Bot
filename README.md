@@ -3,7 +3,7 @@
 A telegram bot that allows compression of multiple files into a ZIP archive, upgraded for deployment on Render. It features asynchronous operation using Pyrogram v2, a dummy web server to keep it alive on Render, and automatic background backups.
 
 ## Features
-- Zip multiple files simultaneously (up to 500 files, max 2GB limit per Telegram API).
+- Zip multiple files simultaneously (max 2GB limit per Telegram API).
 - Automatic topic-based backups to a specified log group.
 - Start-up notifications to administrators.
 - Built-in dummy web server to pass Render health checks.
