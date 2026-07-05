@@ -44,6 +44,18 @@ async def main():
         except Exception as e:
             print(f"Failed to notify admin: {e}")
 
+    # Auto setup bot commands
+    from pyrogram.types import BotCommand
+    try:
+        await app.set_bot_commands([
+            BotCommand("start", "Start the bot"),
+            BotCommand("zip", "Start zipping files"),
+            BotCommand("stopzip", "Stop zipping and get archive")
+        ])
+        print("Bot commands set.")
+    except Exception as e:
+        print(f"Failed to set bot commands: {e}")
+
     from pyrogram import idle
     await idle()
     await app.stop()

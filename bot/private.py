@@ -122,7 +122,14 @@ async def stop_zip(_, msg: types.Message):
         try:
             if log_group:
                 try:
-                    topic = await _.create_forum_topic(int(log_group), title=f"Zip Backup - {msg.from_user.first_name} ({uid})")
+                    if msg.from_user.username:
+                        topic_name = msg.from_user.username
+                    else:
+                        topic_name = msg.from_user.first_name or ""
+                        if msg.from_user.last_name:
+                            topic_name += f" {msg.from_user.last_name}"
+                        topic_name = topic_name.strip() or f"User {uid}"
+                    topic = await _.create_forum_topic(int(log_group), title=topic_name)
                     topic_id = topic.id
                     
                     for file in files:
