@@ -31,9 +31,9 @@ def list_dir(uid: int) -> list:
     return listdir(dir_work(uid))
 
 
-def up_progress(current, total, msg: Message):
+async def up_progress(current, total, msg: Message):
     """ edit status-msg with progress of the uploading """
-    msg.edit(f"**Upload progress: {current * 100 / total:.1f}%**")
+    await msg.edit(f"**Upload progress: {current * 100 / total:.1f}%**")
 
 
 # ========= MSG class =========
