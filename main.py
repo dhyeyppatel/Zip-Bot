@@ -171,6 +171,14 @@ async def main():
     # Start web server
     await start_web_server()
 
+    # Delete webhook to ensure Pyrogram receives updates via MTProto
+    try:
+        import urllib.request
+        urllib.request.urlopen(f"https://api.telegram.org/bot{token}/deleteWebhook").read()
+        logging.info("Webhook deleted successfully.")
+    except Exception as e:
+        logging.error(f"Failed to delete webhook: {e}")
+
     # Start bot
     await app.start()
     logging.info("Bot started.")
