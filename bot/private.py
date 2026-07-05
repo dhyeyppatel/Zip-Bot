@@ -5,19 +5,14 @@ from pyrogram import Client, filters, types
 from zipfile import ZipFile
 from os import remove, rmdir, mkdir
 
-from utils import zip_work, dir_work, up_progress, list_dir, Msg, db_session, User, commit
+from utils import zip_work, dir_work, up_progress, list_dir, Msg, USER_STATUS
 
 
 @Client.on_message(filters.command("start"))
 async def start(_, msg: types.Message):
     """ reply start message and add the user to database """
     uid = msg.from_user.id
-
-    with db_session:
-        if not User.get(uid=uid):
-            User(uid=uid, status=0)  # Initializing the user on database
-            commit()
-
+    USER_STATUS[uid] = 0
     await msg.reply(Msg.start(msg))
 
 
@@ -25,20 +20,11 @@ async def start(_, msg: types.Message):
 async def start_zip(_, msg: types.Message):
     """ starting get files to archive """
     uid = msg.from_user.id
-
     await msg.reply(Msg.zip)
-
-    with db_session:
-        usr = User.get(uid=uid)
-        if usr:
-            usr.status = 1  # change user-status to "INSERT"
-        else:
-            User(uid=uid, status=1)
-        commit()
+    USER_STATUS[uid] = 1  # change user-status to "INSERT"
 
     try:
         mkdir(dir_work(uid))  # create static-folder for user
-
     except FileExistsError:  # in case the folder already exist
         for file in list_dir(uid):
             remove(dir_work(uid) + file)  # delete all file from folder
@@ -50,13 +36,9 @@ async def start_zip(_, msg: types.Message):
 async def enter_files(_, msg: types.Message):
     """ download files """
     uid = msg.from_user.id
-
-    with db_session:
-        usr = User.get(uid=uid)
-        status = usr.status if usr else 0
+    status = USER_STATUS.get(uid, 0)
         
     if status == 1:  # check if user-status is "INSERT"
-
         type_media = msg.document or msg.video or msg.photo or msg.audio
 
         if type_media and type_media.file_size > 2097152000:
@@ -64,9 +46,7 @@ async def enter_files(_, msg: types.Message):
         else:
             downsts = await msg.reply(Msg.downloading, quote=True)  # send status-download message
             await msg.download(dir_work(uid))
-
             await downsts.delete()  # delete status-download message
-
     else:
         await msg.reply(Msg.send_zip)  # if user-status is not "INSERT"
 
@@ -81,14 +61,11 @@ async def stop_zip(_, msg: types.Message):
     else:
         zip_path = "static/" + msg.command[1]  # costume zip-file name
 
-    with db_session:
-        usr = User.get(uid=uid)
-        if usr and usr.status == 1:
-            usr.status = 0  # change user-status to "NOT-INSERT"
-            commit()
-        else:
-            await msg.reply(Msg.send_zip)
-            return
+    if USER_STATUS.get(uid, 0) == 1:
+        USER_STATUS[uid] = 0  # change user-status to "NOT-INSERT"
+    else:
+        await msg.reply(Msg.send_zip)
+        return
 
     files = list_dir(uid)
     stsmsg = await msg.reply(Msg.zipping.format(len(files)))  # send status-message "ZIPPING" and count files
